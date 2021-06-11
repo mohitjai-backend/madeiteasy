@@ -12,6 +12,8 @@ git status
 	List which files are staged, unstaged, and untracked.
 git log
 	Display the entire commit history using the default format. For customization see additional options.
+git fetch --all
+    Fetches all tags/branches
 
 2.GIT DIFF-
 
