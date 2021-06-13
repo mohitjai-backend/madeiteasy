@@ -70,7 +70,7 @@ public class VerticalOrderInTree {
 
 class TNodeVerticalOrder {
     int                data;
-    int                hd;
+    int                hd; // horizontal distance
     TNodeVerticalOrder left;
     TNodeVerticalOrder right;
 
