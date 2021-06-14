@@ -13,7 +13,7 @@ public class RemoveAllAdjacentsDuplicates {
     String removeAllAdjacentDuplicates(String s, int k) {
         Stack<Integer> stack = new Stack<>();
         StringBuilder sb = new StringBuilder(s);
-        stack.push(1);\
+        stack.push(1);
         for (int i = 0; i < sb.length(); i++) {
             if (i == 0 || sb.charAt(i) != sb.charAt(i - 1)) {
                 stack.push(1);
