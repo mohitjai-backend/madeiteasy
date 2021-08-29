@@ -4,18 +4,18 @@ import java.util.Arrays;
 
 public class MinimumNumberOfPlatforms {
     public static void main(String[] args) {
-        int start[] = { 900, 940, 950, 1100, 1500, 1800 };
+        int arr[] = { 900, 940, 950, 1100, 1500, 1800 };
         int dep[] = { 910, 1200, 1120, 1130, 1900, 2000 };
         MinimumNumberOfPlatforms obj = new MinimumNumberOfPlatforms();
-        System.out.println(obj.minNumberOfPlatforms(start, dep));
+        System.out.println(obj.minNumberOfPlatforms(arr, dep));
     }
 
-    int minNumberOfPlatforms(int start[], int dep[]) {
-        int n = start.length;
+    int minNumberOfPlatforms(int arr[], int dep[]) {
+        int n = arr.length;
         if (n == 0)
             return 0;
 
-        Arrays.sort(start);
+        Arrays.sort(arr);
         Arrays.sort(dep);
 
         int i = 1;
@@ -24,7 +24,7 @@ public class MinimumNumberOfPlatforms {
         int ans = 1;
 
         while (i < n && j < n) {
-            if (start[i] < dep[j]) {
+            if (arr[i] < dep[j]) {
                 platforms_needed_curr++;
                 i++;
             } else {
