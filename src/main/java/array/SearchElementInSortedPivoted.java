@@ -39,3 +39,5 @@ public class SearchElementInSortedPivoted {
         return -1;
     }
 }
+
+// https://www.geeksforgeeks.org/search-an-element-in-a-sorted-and-pivoted-array/
