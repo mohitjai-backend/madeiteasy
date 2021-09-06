@@ -25,7 +25,6 @@ public class MaxHeapExample {
         for (int i = 0; i < arr.length; i++) {
             System.out.print(arr[i] + " ");
         }
-
         System.out.println();
     }
 
@@ -39,11 +38,9 @@ public class MaxHeapExample {
         for (int j = 0; j < arr.length - 1; j++) {
             maxHeapArrayAfterRemoving[j] = arr[j];
         }
-
         for (int k = maxHeapArrayAfterRemoving.length / 2 - 1; k >= 0; k--) {
             maxHeapArrayAfterRemoving = maxHeapify(k, maxHeapArrayAfterRemoving);
         }
-
         return maxHeapArrayAfterRemoving;
     }
 
@@ -54,11 +51,9 @@ public class MaxHeapExample {
     int[] buildHeap(int arr[]) {
 
         int maxHeapArray[] = new int[arr.length];
-
         for (int i = arr.length / 2 - 1; i >= 0; i--) {
             maxHeapArray = maxHeapify(i, arr);
         }
-
         return maxHeapArray;
     }
 
@@ -71,11 +66,9 @@ public class MaxHeapExample {
         if (leftChild < arr.length && arr[leftChild] > arr[largest]) {
             largest = leftChild;
         }
-
         if (rightChild < arr.length && arr[rightChild] > arr[largest]) {
             largest = rightChild;
         }
-
         if (largest != i) {
             int temp = arr[i];
             arr[i] = arr[largest];
@@ -83,7 +76,6 @@ public class MaxHeapExample {
 
             arr = maxHeapify(largest, arr);
         }
-
         return arr;
     }
 }
