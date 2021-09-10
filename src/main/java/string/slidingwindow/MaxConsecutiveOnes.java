@@ -19,6 +19,7 @@ public class MaxConsecutiveOnes {
             }
 
             if (k < 0) {
+                // If the left element to be thrown out is zero we increase k.
                 k = k + (1 - arr[left]);
                 left++;
             }
