@@ -30,3 +30,7 @@ public class PrintAllPermutationsOfAGivenString {
 }
 
 // https://www.geeksforgeeks.org/write-a-c-program-to-print-all-permutations-of-a-given-string/
+/*
+Time Complexity: O(n*n!) The time complexity is the same as the above approach,
+i.e. there are n! permutations and it requires O(n) time to print a permutation.
+ */
