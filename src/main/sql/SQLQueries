@@ -1,0 +1,20 @@
+https://leetcode.com/problems/nth-highest-salary/
+
+--> SELECT DISTINCT Salary FROM Employee ORDER BY Salary DESC LIMIT 1 offset M
+
+                        OR
+
+--> SELECT DISTINCT Salary FROM Employee ORDER BY Salary DESC LIMIT M,1
+
+https://leetcode.com/problems/second-highest-salary/
+
+--> SELECT IFNULL((SELECT DISTINCT Salary FROM Employee ORDER BY Salary DESC LIMIT 1 offset 1), null) as SecondHighestSalary
+
+https://leetcode.com/problems/employees-earning-more-than-their-managers/
+
+--> select E.name as employee from employee e join employee m on e.ManagerId=m.id where e.salary>m.salary;
+
+
+Article to understand limit and offset ->
+
+https://www.guru99.com/limit.html
