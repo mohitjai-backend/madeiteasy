@@ -30,3 +30,5 @@ public class MaxConsecutiveOnes {
 }
 
 // https://leetcode.com/problems/max-consecutive-ones-iii/
+// https://leetcode.com/problems/max-consecutive-ones-iii/discuss/719833/Python3-sliding-window-with-clear-example-explains-why-the-soln-works
+
