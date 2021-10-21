@@ -2,11 +2,11 @@ package main.java.dp.zerooneknapsack;
 
 public class EqualSubsetSumPartition {
     public static void main(String[] args) {
-        int nums[] = { 1, 1, 3, 4, 7 };
+        int nums[] = { 1, 2, 3, 4 };
         EqualSubsetSumPartition obj = new EqualSubsetSumPartition();
         System.out.println(obj.isEqualSubsetSumPartition(nums));
 
-        nums = new int[] { 1, 2, 3, 4 };
+        nums = new int[] { 1, 1, 3, 4, 7 };
         System.out.println(obj.isEqualSubsetSumPartition(nums));
 
         nums = new int[] { 2, 3, 4, 6 };
@@ -53,11 +53,24 @@ public class EqualSubsetSumPartition {
             }
         }
 
+//        for (int i = 0; i < n; i++) {
+//            for (int s = 0; s <= sum; s++) {
+//                System.out.print(dp[i][s] + " ");
+//            }
+//            System.out.println();
+//        }
+
         return dp[n - 1][sum];
     }
 }
 
 /*
+
+true true false false false false
+true true true true false false
+true true true true true true
+true true true true true true
+
 Problem Statement-
 Given a set of positive numbers, find if we can partition it into two subsets such that the sum of elements in both the subsets is equal.
 
