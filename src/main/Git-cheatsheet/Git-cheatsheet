@@ -43,6 +43,7 @@ git revert <commit>
 
 
 -----------------------------------------------------------------------------------------------------------------------
+https://levelup.gitconnected.com/reverting-a-merge-commit-7de2e9114c7d
 Revert a PR with multiple commits -
 
 	Merge your PR without squash&merge
