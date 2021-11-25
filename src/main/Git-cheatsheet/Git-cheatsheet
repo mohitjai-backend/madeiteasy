@@ -60,6 +60,8 @@ Revert a PR with multiple commits -
 
 
  	git revert f60080f4f6022788264626f268b132705c6dc8ff -m 1
+	
+	In this situation, git revert f60080f4f6022788264626f268b132705c6dc8ff -m 1 will get you the tree as it was in 8e2149d, and git revert -m 2 will reinstate the tree as it was in 87fd425.
 
 -----------------------------------------------------------------------------------------------------------------------
 
