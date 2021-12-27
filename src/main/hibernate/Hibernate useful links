@@ -3,5 +3,8 @@ Hibernate useful links
 LazyInitializationException
 https://vladmihalcea.com/the-best-way-to-handle-the-lazyinitializationexception/
 
+getCurrentSession vs openSession
+https://java2blog.com/difference-opensession-getcurrentsession-hibernate/
+
 Quick Revise
 https://www.interviewbit.com/hibernate-interview-questions/
