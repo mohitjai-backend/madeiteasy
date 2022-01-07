@@ -1,0 +1,407 @@
+https://tunghatbh.medium.com/mysql-using-index-in-join-query-24c1b4ad83af
+https://dev.mysql.com/doc/refman/8.0/en/explain-output.html#explain-join-types
+https://www.linkedin.com/pulse/mysql-using-index-join-query-nguyen-tung
+https://www.javatpoint.com/mysql-right-join
+https://www.guru99.com/joins.html
+
+
+mysql> show index from inventory_ledger;
++------------------+------------+------------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| Table            | Non_unique | Key_name                     | Seq_in_index | Column_name | Collation | Cardinality | Sub_part | Packed | Null | Index_type | Comment | Index_comment |
++------------------+------------+------------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+| inventory_ledger |          0 | PRIMARY                      |            1 | id          | A         |       19331 |     NULL | NULL   |      | BTREE      |         |               |
+| inventory_ledger |          1 | sku_key                      |            1 | sku_code    | A         |        1940 |     NULL | NULL   |      | BTREE      |         |               |
+| inventory_ledger |          1 | facility_sku_code            |            1 | facility_id | A         |           3 |     NULL | NULL   |      | BTREE      |         |               |
+| inventory_ledger |          1 | facility_sku_code            |            2 | sku_code    | A         |        2003 |     NULL | NULL   |      | BTREE      |         |               |
+| inventory_ledger |          1 | facility_id_sku_code_created |            1 | facility_id | A         |           3 |     NULL | NULL   |      | BTREE      |         |               |
+| inventory_ledger |          1 | facility_id_sku_code_created |            2 | sku_code    | A         |        2003 |     NULL | NULL   |      | BTREE      |         |               |
+| inventory_ledger |          1 | facility_id_sku_code_created |            3 | created     | A         |       19402 |     NULL | NULL   |      | BTREE      |         |               |
+| inventory_ledger |          1 | facility_id_created          |            1 | facility_id | A         |           3 |     NULL | NULL   |      | BTREE      |         |               |
+| inventory_ledger |          1 | facility_id_created          |            2 | created     | A         |        1165 |     NULL | NULL   |      | BTREE      |         |               |
++------------------+------------+------------------------------+--------------+-------------+-----------+-------------+----------+--------+------+------------+---------+---------------+
+9 rows in set (0.01 sec)
+
+*********************************************************************************************************************************************************************************
+
+mysql> explain select * from inventory_ledger group by sku_code ;
++----+-------------+------------------+------------+-------+--------------------------------------------------------+---------+---------+------+-------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys                                          | key     | key_len | ref  | rows  | filtered | Extra |
++----+-------------+------------------+------------+-------+--------------------------------------------------------+---------+---------+------+-------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | sku_key,facility_sku_code,facility_id_sku_code_created | sku_key | 137     | NULL | 20047 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+--------------------------------------------------------+---------+---------+------+-------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger group by sku_code limit 10;
++----+-------------+------------------+------------+-------+--------------------------------------------------------+---------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys                                          | key     | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+--------------------------------------------------------+---------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | sku_key,facility_sku_code,facility_id_sku_code_created | sku_key | 137     | NULL |  103 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+--------------------------------------------------------+---------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger group by created limit 10;
++----+-------------+------------------+------------+------+--------------------------------------------------+------+---------+------+-------+----------+---------------------------------+
+| id | select_type | table            | partitions | type | possible_keys                                    | key  | key_len | ref  | rows  | filtered | Extra                           |
++----+-------------+------------------+------------+------+--------------------------------------------------+------+---------+------+-------+----------+---------------------------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | ALL  | facility_id_sku_code_created,facility_id_created | NULL | NULL    | NULL | 20047 |   100.00 | Using temporary; Using filesort |
++----+-------------+------------------+------------+------+--------------------------------------------------+------+---------+------+-------+----------+---------------------------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger group by sku_code,facility_id limit 5;
++----+-------------+------------------+------------+------+------------------------------------------------+------+---------+------+-------+----------+---------------------------------+
+| id | select_type | table            | partitions | type | possible_keys                                  | key  | key_len | ref  | rows  | filtered | Extra                           |
++----+-------------+------------------+------------+------+------------------------------------------------+------+---------+------+-------+----------+---------------------------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | ALL  | facility_sku_code,facility_id_sku_code_created | NULL | NULL    | NULL | 20047 |   100.00 | Using temporary; Using filesort |
++----+-------------+------------------+------------+------+------------------------------------------------+------+---------+------+-------+----------+---------------------------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger group by facility_id,sku_code limit 5;
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys                                  | key               | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | facility_sku_code,facility_id_sku_code_created | facility_sku_code | 141     | NULL |   50 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+********************************************************************************************************************************************************************************
+
+mysql> explain select * from inventory_ledger order by id;
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+-------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys | key     | key_len | ref  | rows  | filtered | Extra |
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+-------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | NULL          | PRIMARY | 4       | NULL | 20047 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+-------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> explain select * from inventory_ledger order by id limit 6;
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | NULL          | PRIMARY | 4       | NULL |    6 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> explain select * from inventory_ledger order by id desc limit 6;
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | NULL          | PRIMARY | 4       | NULL |    6 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> explain select * from inventory_ledger order by old_balance desc limit 6;
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+| id | select_type | table            | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra          |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20047 |   100.00 | Using filesort |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> explain select * from inventory_ledger order by facility_id limit 6;
++----+-------------+------------------+------------+-------+---------------+-------------------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys | key               | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+---------------+-------------------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | NULL          | facility_sku_code | 141     | NULL |    6 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+---------------+-------------------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+
+IMP:- Index should be present (with both columns)
+
+
+mysql> explain select * from inventory_ledger order by facility_id,sku_code limit 6;
++----+-------------+------------------+------------+-------+---------------+-------------------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys | key               | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+---------------+-------------------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | NULL          | facility_sku_code | 141     | NULL |    6 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+---------------+-------------------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger order by facility_id,old_balance limit 6;
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+| id | select_type | table            | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra          |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20047 |   100.00 | Using filesort |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger order by facility_id,id limit 6;
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+| id | select_type | table            | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra          |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20047 |   100.00 | Using filesort |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger order by sku_code,facility_id limit 6;
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+| id | select_type | table            | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra          |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20047 |   100.00 | Using filesort |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> explain select * from inventory_ledger order by facility_id,created limit 6;
++----+-------------+------------------+------------+-------+---------------+---------------------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys | key                 | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+---------------+---------------------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | NULL          | facility_id_created | 8       | NULL |    6 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+---------------+---------------------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger order by facility_id,id limit 6;
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+| id | select_type | table            | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra          |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20047 |   100.00 | Using filesort |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger order by sku_code,id limit 6;
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys | key     | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | NULL          | sku_key | 137     | NULL |    6 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+---------------+---------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> explain select * from inventory_ledger order by facility_id,created,id limit 6;
++----+-------------+------------------+------------+-------+---------------+---------------------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys | key                 | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+---------------+---------------------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | NULL          | facility_id_created | 8       | NULL |    6 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+---------------+---------------------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+mysql> explain select * from inventory_ledger order by id,sku_code limit 6;
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+| id | select_type | table            | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra          |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20047 |   100.00 | Using filesort |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+----------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+********************************************************************************************************************************************************************************
+
+mysql> explain select * from inventory_ledger group by old_balance order by sku_code limit 6;
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+---------------------------------+
+| id | select_type | table            | partitions | type | possible_keys | key  | key_len | ref  | rows  | filtered | Extra                           |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+---------------------------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | ALL  | NULL          | NULL | NULL    | NULL | 20047 |   100.00 | Using temporary; Using filesort |
++----+-------------+------------------+------------+------+---------------+------+---------+------+-------+----------+---------------------------------+
+1 row in set, 1 warning (0.00 sec)
+
+Note:- Group by me non-index then doesn't matter of order by
+
+Note:- Group by and order by if on same index then only it is optimized
+
+mysql> explain select * from inventory_ledger group by facility_id,sku_code order by facility_id,sku_code limit 6;
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys                                  | key               | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | facility_sku_code,facility_id_sku_code_created | facility_sku_code | 141     | NULL |   60 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger group by facility_id,sku_code order by sku_code limit 6;
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+-------+----------+---------------------------------+
+| id | select_type | table            | partitions | type  | possible_keys                                  | key               | key_len | ref  | rows  | filtered | Extra                           |
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+-------+----------+---------------------------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | facility_sku_code,facility_id_sku_code_created | facility_sku_code | 141     | NULL | 20047 |   100.00 | Using temporary; Using filesort |
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+-------+----------+---------------------------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger group by sku_code order by sku_code limit 6;
++----+-------------+------------------+------------+-------+--------------------------------------------------------+---------+---------+------+------+----------+-------+
+| id | select_type | table            | partitions | type  | possible_keys                                          | key     | key_len | ref  | rows | filtered | Extra |
++----+-------------+------------------+------------+-------+--------------------------------------------------------+---------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | sku_key,facility_sku_code,facility_id_sku_code_created | sku_key | 137     | NULL |   62 |   100.00 | NULL  |
++----+-------------+------------------+------------+-------+--------------------------------------------------------+---------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0.00 sec)
+
+
+mysql> explain select * from inventory_ledger group by facility_id,sku_code order by sku_code desc  limit 6;
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+-------+----------+---------------------------------+
+| id | select_type | table            | partitions | type  | possible_keys                                  | key               | key_len | ref  | rows  | filtered | Extra                           |
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+-------+----------+---------------------------------+
+|  1 | SIMPLE      | inventory_ledger | NULL       | index | facility_sku_code,facility_id_sku_code_created | facility_sku_code | 141     | NULL | 20047 |   100.00 | Using temporary; Using filesort |
++----+-------------+------------------+------------+-------+------------------------------------------------+-------------------+---------+------+-------+----------+---------------------------------+
+1 row in set, 1 warning (0.00 sec)
+
+
+********************************************************************************************************************************************************************************
+
+mysql> explain select * from sale_order_item soi join sale_order so on so.id=soi.sale_order_id limit 5;
++----+-------------+-------+------------+--------+-----------------------------------------------------+---------+---------+---------------------------+--------+----------+-------+
+| id | select_type | table | partitions | type   | possible_keys                                       | key     | key_len | ref                       | rows   | filtered | Extra |
++----+-------------+-------+------------+--------+-----------------------------------------------------+---------+---------+---------------------------+--------+----------+-------+
+|  1 | SIMPLE      | soi   | NULL       | ALL    | fk_sale_order_item_sale_order_id1,order_id_soi_code | NULL    | NULL    | NULL                      | 236848 |   100.00 | NULL  |
+|  1 | SIMPLE      | so    | NULL       | eq_ref | PRIMARY                                             | PRIMARY | 4       | uniware.soi.sale_order_id |      1 |   100.00 | NULL  |
++----+-------------+-------+------------+--------+-----------------------------------------------------+---------+---------+---------------------------+--------+----------+-------+
+2 rows in set, 1 warning (0.00 sec)
+
+mysql> explain select so.* from sale_order_item soi join sale_order so on so.id=soi.sale_order_id limit 5;
++----+-------------+-------+------------+------+-----------------------------------------------------+-----------------------------------+---------+---------------+-------+----------+-------------+
+| id | select_type | table | partitions | type | possible_keys                                       | key                               | key_len | ref           | rows  | filtered | Extra       |
++----+-------------+-------+------------+------+-----------------------------------------------------+-----------------------------------+---------+---------------+-------+----------+-------------+
+|  1 | SIMPLE      | so    | NULL       | ALL  | PRIMARY                                             | NULL                              | NULL    | NULL          | 10762 |   100.00 | NULL        |
+|  1 | SIMPLE      | soi   | NULL       | ref  | fk_sale_order_item_sale_order_id1,order_id_soi_code | fk_sale_order_item_sale_order_id1 | 4       | uniware.so.id |    30 |   100.00 | Using index |
++----+-------------+-------+------------+------+-----------------------------------------------------+-----------------------------------+---------+---------------+-------+----------+-------------+
+2 rows in set, 1 warning (0.00 sec)
+
+mysql> explain select soi.* from sale_order_item soi join sale_order so on so.id=soi.sale_order_id limit 5;
++----+-------------+-------+------------+--------+-----------------------------------------------------+---------+---------+---------------------------+--------+----------+-------------+
+| id | select_type | table | partitions | type   | possible_keys                                       | key     | key_len | ref                       | rows   | filtered | Extra       |
++----+-------------+-------+------------+--------+-----------------------------------------------------+---------+---------+---------------------------+--------+----------+-------------+
+|  1 | SIMPLE      | soi   | NULL       | ALL    | fk_sale_order_item_sale_order_id1,order_id_soi_code | NULL    | NULL    | NULL                      | 236848 |   100.00 | NULL        |
+|  1 | SIMPLE      | so    | NULL       | eq_ref | PRIMARY                                             | PRIMARY | 4       | uniware.soi.sale_order_id |      1 |   100.00 | Using index |
++----+-------------+-------+------------+--------+-----------------------------------------------------+---------+---------+---------------------------+--------+----------+-------------+
+2 rows in set, 1 warning (0.00 sec)
+
+eq_ref -> so me id unique -> soi to so
+ref -> soi me multiple so_id -> so to soi 
+
+mysql> explain select soi.* from sale_order_item soi join sale_order so on so.id=soi.sale_order_id where so.id=88165;
++----+-------------+-------+------------+-------+-----------------------------------------------------+-----------------------------------+---------+-------+------+----------+-------------+
+| id | select_type | table | partitions | type  | possible_keys                                       | key                               | key_len | ref   | rows | filtered | Extra       |
++----+-------------+-------+------------+-------+-----------------------------------------------------+-----------------------------------+---------+-------+------+----------+-------------+
+|  1 | SIMPLE      | so    | NULL       | const | PRIMARY                                             | PRIMARY                           | 4       | const |    1 |   100.00 | Using index |
+|  1 | SIMPLE      | soi   | NULL       | ref   | fk_sale_order_item_sale_order_id1,order_id_soi_code | fk_sale_order_item_sale_order_id1 | 4       | const | 2000 |   100.00 | NULL        |
++----+-------------+-------+------------+-------+-----------------------------------------------------+-----------------------------------+---------+-------+------+----------+-------------+
+2 rows in set, 1 warning (0.00 sec)
+
+
+mysql> explain select soi.* from sale_order_item soi join sale_order so on so.id=soi.sale_order_id where so.id in (88165);
++----+-------------+-------+------------+-------+-----------------------------------------------------+-----------------------------------+---------+-------+------+----------+-------------+
+| id | select_type | table | partitions | type  | possible_keys                                       | key                               | key_len | ref   | rows | filtered | Extra       |
++----+-------------+-------+------------+-------+-----------------------------------------------------+-----------------------------------+---------+-------+------+----------+-------------+
+|  1 | SIMPLE      | so    | NULL       | const | PRIMARY                                             | PRIMARY                           | 4       | const |    1 |   100.00 | Using index |
+|  1 | SIMPLE      | soi   | NULL       | ref   | fk_sale_order_item_sale_order_id1,order_id_soi_code | fk_sale_order_item_sale_order_id1 | 4       | const | 2000 |   100.00 | NULL        |
++----+-------------+-------+------------+-------+-----------------------------------------------------+-----------------------------------+---------+-------+------+----------+-------------+
+2 rows in set, 1 warning (0.00 sec)
+
+-----------------------------------------------------------------------------------------------------
+
+JOINS:-
+
+mysql> select * from channel;
++----+----------+----------+
+| id | code     | name     |
++----+----------+----------+
+|  1 | CUSTOM   | CUSTOM   |
+|  2 | AMAZON   | AMAZON   |
+|  4 | FLIPKART | FLIPKART |
++----+----------+----------+
+3 rows in set (0.00 sec)
+
+mysql> select * from channel_property;
++----+------------+------+
+| id | channel_id | name |
++----+------------+------+
+|  1 |          1 | x    |
+|  2 |          1 | y    |
+|  3 |          1 | z    |
+|  4 |          2 | a    |
+|  5 |          2 | b    |
+|  6 |          3 | m    |
+|  7 |          3 | n    |
+|  8 |          3 | o    |
+|  9 |          3 | p    |
++----+------------+------+
+9 rows in set (0.00 sec)
+
+mysql> select * from channel c join channel_property cp on c.id=cp.channel_id;
++----+--------+--------+----+------------+------+
+| id | code   | name   | id | channel_id | name |
++----+--------+--------+----+------------+------+
+|  1 | CUSTOM | CUSTOM |  1 |          1 | x    |
+|  1 | CUSTOM | CUSTOM |  2 |          1 | y    |
+|  1 | CUSTOM | CUSTOM |  3 |          1 | z    |
+|  2 | AMAZON | AMAZON |  4 |          2 | a    |
+|  2 | AMAZON | AMAZON |  5 |          2 | b    |
++----+--------+--------+----+------------+------+
+5 rows in set (0.01 sec)
+
+mysql> update channel_property set channel_id=4 where channel_id=3;
+Query OK, 4 rows affected (0.00 sec)
+
+Rows matched: 4  Changed: 4  Warnings: 0
+
+mysql> select * from channel c join channel_property cp on c.id=cp.channel_id;
++----+----------+----------+----+------------+------+
+| id | code     | name     | id | channel_id | name |
++----+----------+----------+----+------------+------+
+|  1 | CUSTOM   | CUSTOM   |  1 |          1 | x    |
+|  1 | CUSTOM   | CUSTOM   |  2 |          1 | y    |
+|  1 | CUSTOM   | CUSTOM   |  3 |          1 | z    |
+|  2 | AMAZON   | AMAZON   |  4 |          2 | a    |
+|  2 | AMAZON   | AMAZON   |  5 |          2 | b    |
+|  4 | FLIPKART | FLIPKART |  6 |          4 | m    |
+|  4 | FLIPKART | FLIPKART |  7 |          4 | n    |
+|  4 | FLIPKART | FLIPKART |  8 |          4 | o    |
+|  4 | FLIPKART | FLIPKART |  9 |          4 | p    |
++----+----------+----------+----+------------+------+
+9 rows in set (0.00 sec)
+
+mysql> update channel_property set channel_id=3 where channel_id=4;
+Query OK, 4 rows affected (0.01 sec)
+Rows matched: 4  Changed: 4  Warnings: 0
+
+mysql> select * from channel c join channel_property cp on c.id=cp.channel_id;
++----+--------+--------+----+------------+------+
+| id | code   | name   | id | channel_id | name |
++----+--------+--------+----+------------+------+
+|  1 | CUSTOM | CUSTOM |  1 |          1 | x    |
+|  1 | CUSTOM | CUSTOM |  2 |          1 | y    |
+|  1 | CUSTOM | CUSTOM |  3 |          1 | z    |
+|  2 | AMAZON | AMAZON |  4 |          2 | a    |
+|  2 | AMAZON | AMAZON |  5 |          2 | b    |
++----+--------+--------+----+------------+------+
+5 rows in set (0.00 sec)
+
+
+mysql> select * from channel c left join channel_property cp on c.id=cp.channel_id;
++----+----------+----------+------+------------+------+
+| id | code     | name     | id   | channel_id | name |
++----+----------+----------+------+------------+------+
+|  1 | CUSTOM   | CUSTOM   |    1 |          1 | x    |
+|  1 | CUSTOM   | CUSTOM   |    2 |          1 | y    |
+|  1 | CUSTOM   | CUSTOM   |    3 |          1 | z    |
+|  2 | AMAZON   | AMAZON   |    4 |          2 | a    |
+|  2 | AMAZON   | AMAZON   |    5 |          2 | b    |
+|  4 | FLIPKART | FLIPKART | NULL |       NULL | NULL |
++----+----------+----------+------+------------+------+
+6 rows in set (0.01 sec)
+
+mysql> select * from channel c right join channel_property cp on c.id=cp.channel_id;
++------+--------+--------+----+------------+------+
+| id   | code   | name   | id | channel_id | name |
++------+--------+--------+----+------------+------+
+|    1 | CUSTOM | CUSTOM |  1 |          1 | x    |
+|    1 | CUSTOM | CUSTOM |  2 |          1 | y    |
+|    1 | CUSTOM | CUSTOM |  3 |          1 | z    |
+|    2 | AMAZON | AMAZON |  4 |          2 | a    |
+|    2 | AMAZON | AMAZON |  5 |          2 | b    |
+| NULL | NULL   | NULL   |  6 |          3 | m    |
+| NULL | NULL   | NULL   |  7 |          3 | n    |
+| NULL | NULL   | NULL   |  8 |          3 | o    |
+| NULL | NULL   | NULL   |  9 |          3 | p    |
++------+--------+--------+----+------------+------+
+9 rows in set (0.00 sec)
+
+Index with joins and group by - 
+https://www.linkedin.com/pulse/mysql-using-index-join-query-nguyen-tung
+https://tunghatbh.medium.com/mysql-using-index-in-join-query-24c1b4ad83af
+
