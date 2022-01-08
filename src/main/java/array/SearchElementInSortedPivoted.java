@@ -22,13 +22,13 @@ public class SearchElementInSortedPivoted {
                 return mid;
 
             else if (arr[mid] >= arr[low]) {
-                if (x >= arr[low] && x <= arr[mid - 1]) {
+                if (x >= arr[low] && x < arr[mid]) {
                     high = mid - 1;
                 } else {
                     low = mid + 1;
                 }
             } else {
-                if (x >= arr[mid + 1] && x <= arr[high]) {
+                if (x >= arr[mid] && x <= arr[high]) {
                     low = mid + 1;
                 } else {
                     high = mid - 1;
