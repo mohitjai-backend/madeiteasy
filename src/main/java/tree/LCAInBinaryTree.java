@@ -83,3 +83,16 @@ public class LCAInBinaryTree {
 }
 
 //https://www.geeksforgeeks.org/lowest-common-ancestor-binary-tree-set-1/
+
+/*
+If we assume that the keys n1 and n2 are present in Binary Tree,
+we can find LCA using a single traversal of Binary Tree and without extra storage for path arrays.
+The idea is to traverse the tree starting from the root.
+If any of the given keys (n1 and n2) matches with the root,
+then the root is LCA (assuming that both keys are present).
+If the root doesn’t match with any of the keys, we recur for the left and right subtree.
+The node which has one key present in its left subtree and the other key present in the right subtree is the LCA.
+If both keys lie in the left subtree, then the left subtree has LCA also, otherwise, LCA lies in the right subtree.
+
+Two boolean variables v1 and v2. v1 is set as true when n1 is present in the tree and v2 is set as true if n2 is present in the tree.
+ */
