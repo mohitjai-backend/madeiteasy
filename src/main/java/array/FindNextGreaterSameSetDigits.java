@@ -2,7 +2,8 @@ package main.java.array;
 
 public class FindNextGreaterSameSetDigits {
     public static void main(String[] args) {
-        int digits[] = { 1, 2, 2, 2, 2, 3, 3, 3 };
+        //int digits[] = { 1, 2, 2, 2, 2, 3, 3, 3 };
+        int digits[] = { 5, 3, 4, 9, 7, 6 };
         FindNextGreaterSameSetDigits obj = new FindNextGreaterSameSetDigits();
         obj.findNextGreaterSameSetDigits(digits);
     }
