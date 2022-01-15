@@ -1,4 +1,4 @@
-package main.java.designpatterns;
+package main.java.designpatterns.FactoryPattern;
 
 interface Bank {
     int getInterestRate();
