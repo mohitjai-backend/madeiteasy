@@ -33,6 +33,7 @@ public class RatInAMaze {
 
         if (isSafe(maze, row, col)) {
 
+            // Check if the current block is already part of solution path.
             if (sol[row][col] == 1)
                 return false;
 
