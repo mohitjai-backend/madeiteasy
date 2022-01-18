@@ -1,4 +1,4 @@
-
+/*
 
 class Hotel {
 	
@@ -134,10 +134,14 @@ class RoomBooking {
 	BaseRoomCharge totalRoomCharges;
 }
 
+*/
+
 
 /**
 *	Decorator pattern is used to decorate the prices here.
 **/
+
+/*
 
 interface BaseRoomCharge {
 
@@ -176,3 +180,5 @@ class InRoomPurchaseCharges implements BaseRoomCharge {
 		return baseRoomCharge.getCost();
 	}
 }
+
+*/
