@@ -23,7 +23,7 @@ public class MergeIntervals {
 
         int index = 0;
         for (int i = 1; i < arr.length; i++) {
-            if (arr[index].end >= arr[i].end) {
+            if (arr[index].end >= arr[i].start) {
                 arr[index].end = Math.max(arr[i].end, arr[index].end);
                 arr[index].start = Math.min(arr[i].start, arr[index].start);
             } else {
