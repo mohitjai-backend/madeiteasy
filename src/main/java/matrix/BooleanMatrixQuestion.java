@@ -25,7 +25,11 @@ public class BooleanMatrixQuestion {
                     row_flag = true;
                 if (j == 0 && mat[i][j] == 1)
                     column_flag = true;
+            }
+        }
 
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
                 if (mat[i][j] == 1) {
                     mat[i][0] = 1;
                     mat[0][j] = 1;

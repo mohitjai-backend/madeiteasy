@@ -86,3 +86,14 @@ public class MergeKSortedLinkList {
 // Reverse List A
 // Reverse List B
 // Then call sortedMerge
+
+/*
+Complexity Analysis:
+
+Assuming N(n*k) is the total number of nodes, n is the size of each linked list, and k is the total number of linked lists.
+
+Time Complexity: O(N*log k) or O(n*k*log k)
+As outer while loop in function mergeKLists() runs log k times and every time it processes n*k elements.
+Auxiliary Space: O(N) or O(n*k)
+Because recursion is used in SortedMerge() and to merge the final 2 linked lists of size N/2, N recursive calls will be made.
+ */
