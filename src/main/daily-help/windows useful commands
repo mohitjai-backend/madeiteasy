@@ -1,0 +1,31 @@
+windows useful commands
+1. cd      - change directory
+2. cls     - clear screen
+3. dir     - Displays all folders and files within the current directory.
+4. dir /B  - Displays all folders and files within the current directory in list
+5. find    - Searches through a file or multiple files for a particular character sequence. If you only want to know how frequently the word or phrase occurs, use the /C parameter. With the extension /I the command ignores upper- and lower-case in the search.
+
+Example -
+	find /C /I "Common" "C# learnings"
+	find "common" "C# learnings"
+
+6. mkdir	- Creates a new directory on the specified path. If directories don’t already exist on the path, mkdir creates them automatically (you can also use the md command).
+7. more/type - diplay contents of a file
+8. rmdir - Deletes a directory. This must not contain any files, even hidden ones. 
+9. rmdir /Q /S - delete forcefully
+10. shutdown /s - shutdown the computer
+11. shutdown /r - restart computer
+12. start - it will open new command prompt
+13. tasklist - Lists all running processes
+14. taskkill /F /PID 11568 - kill a specific process
+15. date /T - displays date
+16. time /T - displays time
+17. tree madeiteasy /F - Graphically displays the directory structure of a drive or path. With the /F parameter, all files in the folders are also listed out.
+18. type nul > hello.txt - creates an empty file
+19. hello.txt - will open the file in notepad
+20. copy hello.txt test - copy the file in other folder (folder name is test)
+21. move hello.txt test - move the file in other folder
+22. del hello.txt - deletes a file
+23. del /Q /S test - deletes all files from sub-folders
+24. rename hello.txt hello1.txt - renames a file/folder
+25. exit	- Ends CMD.EXE or CMD.COM.
