@@ -1,0 +1,10 @@
+Node is an interpreter.
+
+Interpreter takes some code as input, will compile but will not produce it anywhere and then will exceute it.
+
+Interpreter has just in time compiler.
+
+Jb JS aaya tb sirf browser pe chal skta tha but now it can be run independently as well with the help of interpreter.
+So now server side programming (after submitting some form from browser backend code can be written in JS also) 
+can also be done with JS.
+
